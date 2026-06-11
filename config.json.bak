@@ -1,0 +1,157 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "fakeip",
+        "tag": "dns-fake",
+        "inet4_range": "198.18.0.0/15"
+      },
+      {
+        "type": "https",
+        "tag": "dns-proxy",
+        "server": "doh.pub",
+        "detour": "proxy"
+      },
+      {
+        "type": "udp",
+        "tag": "dns-direct",
+        "server": "223.5.5.5"
+      }
+    ],
+    "rules": [
+      {
+        "domain_suffix": [
+          ".entry.fr0528.art",
+          ".yhckr.top",
+          ".yhcrb.top"
+        ],
+        "server": "dns-direct"
+      },
+      {
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
+        "server": "dns-fake",
+        "rewrite_ttl": 1
+      }
+    ],
+    "final": "dns-proxy",
+    "independent_cache": true
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 7890
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "vmess",
+      "tag": "jp-free",
+      "server": "jm2h0-g05.jp01-nn-vm0.entry.fr0528.art",
+      "server_port": 21585,
+      "uuid": "d8b2b15b-3ed1-39c5-a9dc-39bceaf35852",
+      "security": "auto",
+      "alter_id": 1,
+      "tls": {
+        "enabled": true,
+        "insecure": true
+      },
+      "domain_resolver": "dns-direct"
+    },
+    {
+      "type": "vmess",
+      "tag": "sg-vip1",
+      "server": "sgvip.yhckr.top",
+      "server_port": 63337,
+      "uuid": "3f4a2487-d49e-42bf-ac83-8088785a0648",
+      "security": "auto",
+      "alter_id": 0,
+      "domain_resolver": "dns-direct"
+    },
+    {
+      "type": "vmess",
+      "tag": "sg-vip2",
+      "server": "sgvip.yhckr.top",
+      "server_port": 63338,
+      "uuid": "3f4a2487-d49e-42bf-ac83-8088785a0648",
+      "security": "auto",
+      "alter_id": 0,
+      "domain_resolver": "dns-direct"
+    },
+    {
+      "type": "vmess",
+      "tag": "jp-cn2-a",
+      "server": "rb.yhcrb.top",
+      "server_port": 11122,
+      "uuid": "3f4a2487-d49e-42bf-ac83-8088785a0648",
+      "security": "auto",
+      "alter_id": 0,
+      "domain_resolver": "dns-direct"
+    },
+    {
+      "type": "vmess",
+      "tag": "jp-cn2-b",
+      "server": "rb.yhcrb.top",
+      "server_port": 11133,
+      "uuid": "3f4a2487-d49e-42bf-ac83-8088785a0648",
+      "security": "auto",
+      "alter_id": 0,
+      "domain_resolver": "dns-direct"
+    },
+    {
+      "type": "urltest",
+      "tag": "auto",
+      "outbounds": [
+        "jp-free",
+        "sg-vip1",
+        "sg-vip2",
+        "jp-cn2-a",
+        "jp-cn2-b"
+      ],
+      "url": "http://1.1.1.1",
+      "interval": "30s",
+      "tolerance": 200
+    },
+    {
+      "type": "selector",
+      "tag": "proxy",
+      "outbounds": [
+        "auto",
+        "jp-free",
+        "sg-vip1",
+        "sg-vip2",
+        "jp-cn2-a",
+        "jp-cn2-b"
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [],
+    "final": "proxy",
+    "default_domain_resolver": "dns-proxy",
+    "auto_detect_interface": true
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db"
+    },
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": ""
+    }
+  }
+}
